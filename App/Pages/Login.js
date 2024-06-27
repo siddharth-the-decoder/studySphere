@@ -1,10 +1,35 @@
-import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import Colors from "../Shared/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+
 const { width } = Dimensions.get("window");
 
 export default function Login() {
+  WebBrowser.maybeCompleteAuthSession();
+  const [accessToken, setAccessToken] = useState();
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId:
+      "801480532662-b4voan849bedrurpqbdn2f96fir4bn5m.apps.googleusercontent.com",
+    expoClientId:
+      "801480532662-1m94ocfpdqla45tlp1f0t740rrtt7597.apps.googleusercontent.com",
+  });
+
+  useEffect(() => {
+    if (response?.type == "success") {
+      setAccessToken(response.authentication.accessToken);
+      console.log(response.authentication.accessToken);
+    }
+  }, [response]);
   return (
     <View style={styles.page}>
       <Image
@@ -16,7 +41,7 @@ export default function Login() {
         <Text style={{ textAlign: "center", marginTop: 80, fontSize: 20 }}>
           Login/Signup
         </Text>
-        <View style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => promptAsync()}>
           <Ionicons
             name="logo-google"
             size={24}
@@ -24,7 +49,7 @@ export default function Login() {
             style={{ marginRight: 10 }}
           />
           <Text style={{ color: Colors.white }}>Sign In with Google</Text>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
